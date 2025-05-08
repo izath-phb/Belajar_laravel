@@ -1,51 +1,38 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
-
-use App\http\Controllers\HomepageController;
-
-// Route::get('/', function () {
-//     return view('web.homepage');
-// });
-
-// Route::get('/', function () {
-//     $title = "Homepage";
-//     return view('web.homepage', ['title' => $title]);
-// });
-
-
-Route::get('/', [HomepageController::class, 'index']);
-Route::get('/products', [HomepageController::class, 'products']);
-Route::get('/product/{slug}', [HomepageController::class, 'product']);
-Route::get('/categories',[HomepageController::class, 'categories']);
-Route::get('/category/{slug}', [HomepageController::class, 'category']);
-Route::get('/cart', [HomepageController::class, 'cart']);
-Route::get('/checkout', [HomepageController::class, 'checkout']);
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HomepageController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProductCategoryController;
 
 
 
-// Route::get('product/{slug}', function ($slug) {
-//     return "halaman single product - " . $slug;
-// });
-
-// Route::get('categories', function () {
-//     return view("web.categories");
-// });
-
-// Route::get('category/{slug}', function ($slug) {
-//     return "halaman single category - " . $slug;
-// });
-
-// Route::get('cart', function () {
-//     $title = "Cart";
-//     return view("web.cart", ['title' => $title]);
-// });
-
-// Route::get('checkout', function () {
-//     $title = "co";
-//     return view("web.checkout", ['title' => $title]);
-// });
+//kode baru diubah menjadi seperti ini
+Route::get('/', [HomepageController::class, 'index'])->name('home');
+Route::get('products', [HomepageController::class, 'products']);
+Route::get('product/{slug}', [HomepageController::class, 'product']);
+Route::get('categories',[HomepageController::class, 'categories']);
+Route::get('category/{slug}', [HomepageController::class, 'category']);
+Route::get('cart', [HomepageController::class, 'cart']);
+Route::get('checkout', [HomepageController::class, 'checkout']);
 
 
-// require __DIR__ . '/auth.php';
+Route::group(['prefix'=>'dashboard'], function(){
+    Route::get('/',[DashboardController::class,'index'])->name('dashboard');
+
+    Route::resource('categories',ProductCategoryController::class);
+    Route::get('products',[DashboardController::class,'products'])->name('products');
+
+})->middleware(['auth', 'verified']);
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::redirect('settings', 'settings/profile');
+
+    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
+    Volt::route('settings/password', 'settings.password')->name('settings.password');
+    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+});
+
+require __DIR__.'/auth.php';
